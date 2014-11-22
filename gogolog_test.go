@@ -32,7 +32,7 @@ func TestLogger_Log_ShouldOutput(t *testing.T) {
 	buf := &bytes.Buffer{}
 
 	w := NewWriter(WARN, buf)
-	l := NewLogger(INFO, "gogolog ", log.LstdFlags, w)
+	l := New(INFO, "gogolog ", log.LstdFlags, w)
 
 	l.Error("Hello Logger!")
 
@@ -45,7 +45,7 @@ func TestLogger_Log_ShouldNotOutput(t *testing.T) {
 	buf := &bytes.Buffer{}
 
 	w := NewWriter(CRIT, buf)
-	l := NewLogger(WARN, "gogolog ", log.LstdFlags, w)
+	l := New(WARN, "gogolog ", log.LstdFlags, w)
 
 	l.Error("Hello Logger!")
 

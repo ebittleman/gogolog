@@ -26,7 +26,7 @@ func NewFlushingWriter(
 	output io.Writer,
 	flushOnNumWrites int,
 	flushTimeout time.Duration,
-) io.Writer {
+) *FlushingWriter {
 	f := &FlushingWriter{
 		output:           output,
 		flushOnNumWrites: flushOnNumWrites,

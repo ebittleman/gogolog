@@ -4,23 +4,25 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 )
 
 type Level int
 
 const (
 	EMERG Level = iota
-	ALERT Level = iota
-	CRIT  Level = iota
-	ERROR Level = iota
-	WARN  Level = iota
-	INFO  Level = iota
-	DEBUG Level = iota
+	ALERT
+	CRIT
+	ERROR
+	WARN
+	INFO
+	DEBUG
 )
 
 type Logger interface {
 	SetLevel(Level)
 	AddWriter(*Writer)
+	GetLogger(Level) *log.Logger
 
 	Log(Level, string)
 	Logf(Level, string, ...interface{})
@@ -45,12 +47,14 @@ type Logger interface {
 
 	Debug(string)
 	Debugf(string, ...interface{})
+
+	io.Writer
 }
 
 type Writer struct {
 	level Level
-	log   *log.Logger
 	io.Writer
+	log *log.Logger
 }
 
 type logger struct {
@@ -60,7 +64,7 @@ type logger struct {
 	writers []*Writer
 }
 
-func NewLogger(
+func New(
 	level Level,
 	prefix string,
 	flag int,
@@ -79,6 +83,14 @@ func NewLogger(
 	}
 
 	return logger
+}
+
+func NewLogger(level Level,
+	prefix string,
+	flag int,
+	writers ...*Writer,
+) *log.Logger {
+	return New(level, prefix, flag, writers...).GetLogger(level)
 }
 
 func NewWriter(level Level, w io.Writer) *Writer {
@@ -170,4 +182,23 @@ func (l *logger) Debug(msg string) {
 
 func (l *logger) Debugf(format string, args ...interface{}) {
 	l.Logf(DEBUG, format, args)
+}
+
+func (l *logger) Write(bytes []byte) (int, error) {
+	l.Log(l.level, strings.Trim(string(bytes), "\n"))
+	return len(bytes), nil
+}
+
+func (l *logger) GetLogger(level Level) *log.Logger {
+	return log.New(&WrappedLogger{l, level}, "", 0)
+}
+
+type WrappedLogger struct {
+	l     *logger
+	level Level
+}
+
+func (wl *WrappedLogger) Write(bytes []byte) (int, error) {
+	wl.l.Log(wl.level, strings.Trim(string(bytes), "\n"))
+	return len(bytes), nil
 }
