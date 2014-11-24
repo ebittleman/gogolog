@@ -85,14 +85,6 @@ func New(
 	return logger
 }
 
-func NewLogger(level Level,
-	prefix string,
-	flag int,
-	writers ...*Writer,
-) *log.Logger {
-	return New(level, prefix, flag, writers...).GetLogger(level)
-}
-
 func NewWriter(level Level, w io.Writer) *Writer {
 	return &Writer{Writer: w, level: level}
 }
